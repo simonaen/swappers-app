@@ -1,4 +1,4 @@
-import { enumType, inputObjectType, objectType } from "nexus";
+import { enumType, extendType, inputObjectType, objectType } from "nexus";
 import { Item } from "./item";
 
 export const User = objectType({
@@ -28,3 +28,15 @@ export const Role = enumType({
   members: ["USER", "ADMIN"],
   description: "Roles enumurator. Conatains value: USER, ADMIN."
 });
+
+export const UsersQuery = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.list.nonNull.field('allUsers', {
+            type: 'User',
+            resolve: (_parent, _args, context) => {
+              return context.prisma.user.findMany()
+            },
+        })
+    }
+})
