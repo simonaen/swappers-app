@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(uuid())
+  createdAt      DateTime       @default(now()) @map("created_at")
+  email          String         @unique
+  firstName      String         @map("first_name")
+  lastName       String         @map("last_name")
+  role           Role           @default(USER)
+  blocked        Boolean        @default(false)
+  items          Item[]
+  trade          Trade[]
+  wishListItems  WishList[]     
+  addresses      AddressBook[]
+
+  @@map("users")
+}
+
+model WishList {
+  userId    String    @map("user_id")
+  itemId    String    @map("item_id")
+  user      User      @relation(fields: [userId],references: [id])
+  item      Item      @relation(fields: [itemId],references: [id])
+
+  @@id([userId,itemId])
+  @@map("wishlist")
+}
+
+model AddressBook {
+  id                String   @id @default(uuid())
+  city              String
+  postalCode        String   @map("postal_code")           
+  addressLine       String   @map("address_line")           
+  phone             String
+  userId            String   @map("user_id")
+  user              User     @relation(fields: [userId], references:[id])
+
+  @@map("addressbook")
+}
+
+model Item {
+  id                String              @id @default(uuid())
+  ownerId           String              @map("owner_id")
+  dateAdded         DateTime            @default(now()) @map("date_added")
+  dateLastModified  DateTime            @default(now()) @map("date_last_modified")
+  name              String
+  description       String?
+  sold              Boolean             @default(false)
+  owner             User                @relation(fields: [ownerId], references: [id])
+  color             Color
+  subCategoryId     String              @map("sub_category_id")
+  subCatgory        SubCategory         @relation(fields: [subCategoryId], references:[id])
+  contentLinks      ItemContentLink[]
+  trade             Trade?
+  wishLists         WishList[]
+
+  @@map("items")
+}
+
+model MainCategory {
+  id                String        @id @default(uuid())
+  name              String        @unique
+  subCategories     SubCategory[] 
+
+  @@map("main_categories")
+}
+
+model SubCategory {
+  id                String       @id @default(uuid())
+  name              String       @unique
+  mainCategoryId    String       @map("main_category_id")
+  mainCategory      MainCategory @relation(fields: [mainCategoryId], references:[id])
+  item              Item?
+
+  @@map("sub_categories")
+}
+
+model ItemContentLink {
+  contentLink       String        @unique @map("content_link")
+  itemId            String
+  item              Item          @relation(fields: [itemId],references:[id])
+
+  @@map("item_content_links")
+}
+
+model Trade {
+  id          String        @id @default(uuid())
+  itemId      String        @map("item_id")
+  buyerId     String        @map("buyer_id")
+  dateCreated DateTime      @default(now()) @map("date_created")
+  item        Item          @relation(fields: [itemId], references:[id])
+  buyer       User          @relation(fields: [buyerId], references:[id])
+
+  @@map("trades")
+}
+
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Color {
+  RED
+  ORANGE
+  YELLOW
+  GREEN
+  BLUE
+  PURPLE
+  PINK
+  BROWN
+  BEIGE
+  WHITE
+  BLACK
+  GRAY
+  MULTICOLOR
+  GOLD
+  SILVER
+}
