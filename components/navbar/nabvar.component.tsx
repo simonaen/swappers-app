@@ -5,7 +5,7 @@ import {
   MenuIcon,
   XIcon,
 } from '@heroicons/react/outline'
-import { useUser } from '@auth0/nextjs-auth0';
+import { getSession, useUser } from '@auth0/nextjs-auth0';
 import { gql, useQuery } from '@apollo/client';
 import Link from 'next/link';
 
@@ -31,11 +31,6 @@ export default function Navbar() {
   const { user } = useUser();
   const { data, loading, error } = useQuery(AllCategoriesQuery)
 
-  console.log(user);
-  console.log(data);
-  
-
-
   return (
     <Popover className="bg-white sticky top-0 ">
       <div className="max-w-full mx-auto px-4 sm:px-6">
@@ -56,14 +51,14 @@ export default function Navbar() {
                   <Popover.Button
                     className={classNames(
                       open ? 'text-gray-900' : 'text-gray-500',
-                      'group bg-white rounded-md inline-flex items-center text-base font-medium hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                      'group bg-white rounded-md inline-flex items-center hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2'
                     )}
                   >
-                    <span>categories</span>
+                    <span className='text-sm'>categories</span>
                     <ChevronDownIcon
                       className={classNames(
                         open ? 'text-gray-600' : 'text-gray-400',
-                        'ml-2 h-5 w-5 group-hover:text-gray-500'
+                        'ml-2 h-4 w-4 group-hover:text-gray-500'
                       )}
                       aria-hidden="true"
                     />
@@ -78,7 +73,7 @@ export default function Navbar() {
                     leaveFrom="opacity-100 translate-y-0"
                     leaveTo="opacity-0 translate-y-1"
                   >
-                    <Popover.Panel className="absolute z-50 mt-3 transform px-2 w-max sm:px-0 lg:ml-0">
+                    <Popover.Panel className="absolute z-100 mt-3 transform px-2 w-max sm:px-0 lg:ml-0">
                       <div className="rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden">
                         <div className="relative grid grid-cols-5 gap-6 bg-white px-5 py-6 sm:gap-8 sm:p-8">
                           {
@@ -89,7 +84,7 @@ export default function Navbar() {
                                     return (
                                     <li key={subcat.id}>
                                         <a href={'/browse/' + category.name.toLowerCase() + '/' + subcat.name.toLowerCase()} 
-                                        className="block py-3 text-gray-600 hover:text-red-400">{subcat.name}</a>
+                                        className="block py-3 text-gray-600 hover:text-blue-400">{subcat.name}</a>
                                     </li>)
                                 })}
                               </ul>
@@ -105,11 +100,11 @@ export default function Navbar() {
         </Popover.Group>
           { !user ? (
               <div className="hidden md:flex items-center justify-end md:flex-1 lg:w-0" >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 pr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 pr-2 " fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>
                 <Link href="/api/auth/login">
-                <a className="whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900">
+                <a className="whitespace-nowrap text-sm text-gray-500 hover:text-gray-900">
                   login / register
                 </a>
                 </Link>
@@ -120,7 +115,7 @@ export default function Navbar() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <Link href="/dashboard">
-                  <a className="whitespace-nowrap text-base font-medium text-gray-500 pr-2 border-r-2 hover:text-gray-900">
+                  <a className="whitespace-nowrap text-sm text-gray-500 pr-2 border-r-2 hover:text-gray-900">
                     dashboard
                   </a>
                 </Link>
@@ -128,7 +123,7 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>
                 <Link href="/api/auth/logout">
-                  <a className="whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900">
+                  <a className="whitespace-nowrap text-sm text-gray-500 hover:text-gray-900">
                     log out
                   </a>
                 </Link>
