@@ -39,7 +39,18 @@ export const UsersQuery = extendType({
             resolve: (_parent, _args, context) => {
               return context.prisma.user.findMany()
             },
-        })
+        }),
+        t.nonNull.field('user', {
+          type: 'User',
+          args: {
+            userEmail: nonNull(stringArg())
+          },
+          resolve: (_parent, _args, context) => {
+            return context.prisma.user.findFirst({
+              where: {email: _args.userEmail}
+            })
+          },
+      })
     }
 })
 
