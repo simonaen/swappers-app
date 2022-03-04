@@ -1,5 +1,6 @@
-import { enumType, extendType, inputObjectType, objectType } from "nexus";
+import { enumType, extendType, mutationType, nonNull, objectType, stringArg } from "nexus";
 import { Item } from "./item";
+import { DateScalar } from "./shared";
 
 export const User = objectType({
     name: 'User',
@@ -9,6 +10,7 @@ export const User = objectType({
       t.string('lastName')
       t.nonNull.string('email')
       t.nonNull.boolean('blocked')
+      t.nonNull.field('createdAt', {type: DateScalar})
       t.nonNull.field('role', {type: Role})
       t.nonNull.list.nonNull.field('items', {
         type: Item,
@@ -38,5 +40,61 @@ export const UsersQuery = extendType({
               return context.prisma.user.findMany()
             },
         })
+    }
+})
+
+export const UserMutations = mutationType({
+    definition(t) {
+          t.field('blockUser', {
+            type: 'User',
+            args: {
+              userId: nonNull(stringArg())
+            },
+            resolve: (_parent, _args, context) => {
+              return context.prisma.user.update({
+                where: {
+                  id: _args.userId
+                },
+                data: {
+                  blocked: true
+                }
+              })
+            },
+          })
+
+          t.field('unblockUser', {
+            type: 'User',
+            args: {
+              userId: nonNull(stringArg())
+            },
+            resolve: (_parent, _args, context) => {
+              return context.prisma.user.update({
+                where: {
+                  id: _args.userId
+                },
+                data: {
+                  blocked: false
+                }
+              })
+            },
+          })
+
+          t.field('changeUserRole', {
+            type: 'User',
+            args: {
+              userId: nonNull(stringArg()),
+              role: nonNull(Role)
+            },
+            resolve: (_parent, _args, context) => {
+              return context.prisma.user.update({
+                where: {
+                  id: _args.userId
+                },
+                data: {
+                  role: _args.role
+                }
+              })
+            },
+          })
     }
 })
