@@ -54,7 +54,8 @@ export const UsersQuery = extendType({
     }
 })
 
-export const UserMutations = mutationType({
+export const UserMutations = extendType({
+  type: 'Mutation',
     definition(t) {
           t.field('blockUser', {
             type: 'User',
