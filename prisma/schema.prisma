@@ -59,7 +59,7 @@ model Item {
   owner             User                @relation(fields: [ownerId], references: [id])
   color             Color
   subCategoryId     String              @map("sub_category_id")
-  subCatgory        SubCategory         @relation(fields: [subCategoryId], references:[id])
+  subCategory       SubCategory         @relation(fields: [subCategoryId], references:[id])
   contentLinks      ItemContentLink[]
   trade             Trade?
   wishLists         WishList[]
@@ -80,7 +80,7 @@ model SubCategory {
   name              String       @unique
   mainCategoryId    String       @map("main_category_id")
   mainCategory      MainCategory @relation(fields: [mainCategoryId], references:[id])
-  item              Item?
+  items             Item[]
 
   @@map("sub_categories")
 }
