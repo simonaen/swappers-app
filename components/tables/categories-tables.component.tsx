@@ -1,6 +1,6 @@
-import { gql, useQuery } from "@apollo/client"
+import { gql, useMutation, useQuery } from "@apollo/client"
 import { useUser } from "@auth0/nextjs-auth0";
-import React from "react";
+import React, { useState } from "react";
 
 const AllCategoriesQuery = gql`
   query {
@@ -15,9 +15,17 @@ const AllCategoriesQuery = gql`
   }
 `
 
-const DeleteItem = gql`
-    mutation deleteItem($itemId: String!) {
-        deleteItem(itemId: $itemId) {
+const AddNewMainCategory = gql`
+    mutation addMainCategory($name: String!) {
+        addMainCategory(name: $name) {
+            id
+        }
+    }
+`
+
+const AddNewSubCategory = gql`
+    mutation addSubCategory($mainCatId: String!, $name: String!) {
+        addSubCategory(mainCatId: $mainCatId, name: $name) {
             id
         }
     }
@@ -26,12 +34,55 @@ const DeleteItem = gql`
 export default function CategoriesTables() {
     const { user } = useUser();
     const { data, loading, error } = useQuery(AllCategoriesQuery)
-    const [showModal, setShowModal] = React.useState(false);
+    const [addMainCategory] = useMutation(AddNewMainCategory);
+    const [addSubCategory] = useMutation(AddNewSubCategory);
 
-    let modaldata: any;
-    const openModal = (category: any) => {
-        modaldata = category;
-        setShowModal(true); 
+    const [showModal, setShowModal] = useState(false);
+    const [mainCategoryForm, setMainCatValues] = useState({mainName: ''});
+    const [subCategoryForm, setSubCatValues] = useState({mainCatId: data?.allCategories[0].id, subName: ''});
+
+    const set = (name) => {
+        return ({ target: { value } }) => {
+          setMainCatValues(oldValues => ({...oldValues, [name]: value }));
+          setSubCatValues(oldValues => ({...oldValues, [name]: value }));
+        }
+      };
+
+    const onSubmitNewMain = (event) => {
+        event.preventDefault();
+
+        addMainCategory({
+            variables: {
+                name: mainCategoryForm.mainName
+            }
+        });
+
+        setMainCatValues({
+            mainName: ''
+        });
+
+        setShowModal(false); 
+        window.location.reload();
+    }
+
+    const onSubmitNewSub = (event) => {
+        event.preventDefault();
+        console.log(subCategoryForm);
+        
+        addSubCategory({
+            variables: {
+                mainCatId: subCategoryForm.mainCatId, 
+                name: subCategoryForm.subName
+            }
+        });
+
+        setSubCatValues({
+            mainCatId: '',
+            subName: ''
+        });
+
+        setShowModal(false); 
+        window.location.reload();
     }
     
     
@@ -55,9 +106,6 @@ return (
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                     Sub Categories
-                </th>
-                <th scope="col" className="relative px-6 py-3">
-                    <span className="sr-only">Actions</span>
                 </th>
                 </tr>
             </thead>
@@ -83,15 +131,16 @@ return (
                         </div>
                     </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <a className="px-2 text-indigo-600 hover:text-indigo-900" onClick={() => openModal(category)}>
-                        Edit
-                    </a>
-                    </td>
                 </tr>
                 ))}
             </tbody>
             </table>
+        </div>
+        <div className="flex my-4">
+                <div className="w-fit items-center justify-center px-4 py-2 mr-4 border border-transparent rounded-md shadow-sm text-white bg-blue-200 hover:bg-indigo-200"
+                    onClick={()=> setShowModal(true)}>
+                  Add new category
+                </div>
         </div>
         </div>
     </div>
@@ -100,13 +149,13 @@ return (
           <div
             className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
           >
-            <div className="relative w-auto my-6 mx-auto max-w-3xl">
+            <div className="relative w-full my-6 mx-auto max-w-3xl">
               {/*content*/}
               <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
                 {/*header*/}
                 <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
                   <h3 className="text-3xl font-semibold">
-                    Update {modaldata?.name}
+                    Add category
                   </h3>
                   <button
                     className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
@@ -118,14 +167,87 @@ return (
                   </button>
                 </div>
                 {/*body*/}
-                <div className="relative p-6 flex-auto">
-                  <p className="my-4 text-blueGray-500 text-lg leading-relaxed">
-                    I always felt like I could do anything. That’s the main
-                    thing people are controlled by! Thoughts- their perception
-                    of themselves! They're slowed down by their perception of
-                    themselves. If you're taught you can’t do anything, you
-                    won’t do anything. I was taught I could do everything.
-                  </p>
+                <div className="grid grid-cols-2 gap-4 divide-x-2">
+                    <div>
+                    <p className="text-sm p-5 text-gray-500">Add new main category.</p>
+                    <form onSubmit={onSubmitNewMain}>
+                        <div className="overflow-hidden sm:rounded-md">
+                            <div className="px-4 py-5 bg-white sm:p-6">
+                            <div className="flex flex-col">
+                                <div className="col-span-6 sm:col-span-3">
+                                <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">
+                                    Category Name
+                                </label>
+                                <input
+                                    value={mainCategoryForm.mainName}
+                                    onChange={set('mainName')}
+                                    type="text"
+                                    name="category-name"
+                                    id="category-name"
+                                    className="mt-1 block w-max shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                />
+                                </div>
+                            </div>
+                            </div>
+                            <div className="px-4 py-3  text-right sm:px-6">
+                            <button
+                                type="submit"
+                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-200 hover:bg-indigo-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                Save
+                            </button>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                    <div>
+                    <p className="text-sm p-5 text-gray-500">Add new sub category.</p>
+                    <form onSubmit={onSubmitNewSub}>
+                        <div className="overflow-hidden sm:rounded-md">
+                            <div className="px-4 py-5 bg-white sm:p-6">
+                            <div className="flex flex-col">
+                                <div className="col-span-6 sm:col-span-3">
+                                    <label htmlFor="maincategory" className="block text-sm font-medium text-gray-700">
+                                        Main category
+                                    </label>
+                                    <select
+                                        value={subCategoryForm.mainCatId}
+                                        onChange={set('mainCatId')}
+                                        id="maincategory"
+                                        name="maincategory"
+                                        className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none sm:text-sm"
+                                    >
+                                        {data?.allCategories.map((category) => (
+                                            <option key={category.id} value={category.id}>{category.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="col-span-6 sm:col-span-3">
+                                <label htmlFor="subcategory-name" className="block text-sm font-medium text-gray-700">
+                                    Category Name
+                                </label>
+                                <input
+                                    value={subCategoryForm.subName}
+                                    onChange={set('subName')}
+                                    type="text"
+                                    name="subcategory-name"
+                                    id="subcategory-name"
+                                    className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                />
+                                </div>
+                            </div>
+                            </div>
+                            <div className="px-4 py-3  text-right sm:px-6">
+                            <button
+                                type="submit"
+                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-200 hover:bg-indigo-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                Save
+                            </button>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
                 </div>
                 {/*footer*/}
                 <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
@@ -135,13 +257,6 @@ return (
                     onClick={() => setShowModal(false)}
                   >
                     Close
-                  </button>
-                  <button
-                    className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Save Changes
                   </button>
                 </div>
               </div>

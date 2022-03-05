@@ -1,4 +1,4 @@
-import { extendType, objectType } from "nexus"
+import { extendType, nonNull, objectType, stringArg } from "nexus"
 
 export const MainCategory = objectType({
     name: 'MainCategory',
@@ -36,4 +36,41 @@ export const CategoriesQuery = extendType({
             },
         })
     }
+})
+
+export const CategoriesMutation = extendType({
+  type: 'Mutation',
+  definition(t) {
+      t.field('addMainCategory', {
+          type: 'MainCategory',
+          args: {
+            name: nonNull(stringArg())
+          },
+          resolve: (_parent, _args, context) => {
+            return context.prisma.mainCategory.create({
+              data: {
+                name: _args.name
+              }
+            }
+            )
+          },
+      }),
+
+      t.field('addSubCategory', {
+        type: 'SubCategory',
+        args: {
+          mainCatId: nonNull(stringArg()),
+          name: nonNull(stringArg())
+        },
+        resolve: (_parent, _args, context) => {
+          return context.prisma.subCategory.create({
+            data: {
+              mainCategoryId: _args.mainCatId, 
+              name: _args.name
+            }
+          }
+          )
+        },
+    })
+  }
 })
