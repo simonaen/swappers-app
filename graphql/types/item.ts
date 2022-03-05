@@ -10,7 +10,16 @@ export const Item = objectType({
       t.nonNull.field('dateLastModified', { type: DateScalar })
       t.nonNull.string('name')
       t.string('description')
-      t.string('content')
+      t.list.field('contentLinks', {
+        type: ItemContentLink,
+        async resolve(_parent, _args, context) {
+          return await context.prisma.item
+            .findUnique({
+              where: { id: _parent.id || undefined },
+            }).contentLinks()
+        },
+      })
+      t.nonNull.int('price')
       t.nonNull.boolean('sold')
       t.nonNull.int('viewCount')
       t.field('owner', {
@@ -25,6 +34,14 @@ export const Item = objectType({
     },
 });
 
+export const ItemContentLink = objectType({
+  name: 'ItemContentLink',
+  definition(t) {
+    t.string('contentLink')
+    t.string('itemId')
+  }
+})
+
 export const ItemQuery = extendType({
   type: 'Query',
   definition(t) {
@@ -33,7 +50,18 @@ export const ItemQuery = extendType({
           resolve: (_parent, _args, context) => {
             return context.prisma.item.findMany()
           },
-      })
+      }),
+      t.list.nonNull.field('allItemsByUser', {
+        type: 'Item',
+        args: {
+          userId: nonNull(stringArg())
+        },
+        resolve: (_parent, _args, context) => {
+          return context.prisma.item.findMany({where: {
+            ownerId: _args.userId
+          }})
+        },
+    })
   }
 });
 
