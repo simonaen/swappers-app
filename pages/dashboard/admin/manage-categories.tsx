@@ -15,7 +15,10 @@ export default function ManageCategories() {
 
       <Navbar />
       <Sidebar>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8">
+        <h2 className="text-2xl font-extrabold tracking-tight text-gray-900">Manage Categories</h2>
         <CategoriesTable/>
+      </div>
       </Sidebar>
       
     </div>
