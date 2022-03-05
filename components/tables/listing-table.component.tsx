@@ -38,8 +38,6 @@ export default function ListingTable() {
         deleteItem({variables: { itemId: itemId}});
         window.location.reload();
     }
-
-    console.log(data);
     
 return (
     

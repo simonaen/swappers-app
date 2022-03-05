@@ -31,7 +31,7 @@ const AddNewSubCategory = gql`
     }
 `
 
-export default function CategoriesTables() {
+export default function CategoriesTable() {
     const { user } = useUser();
     const { data, loading, error } = useQuery(AllCategoriesQuery)
     const [addMainCategory] = useMutation(AddNewMainCategory);
