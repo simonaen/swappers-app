@@ -117,7 +117,7 @@ export const ItemMutations = extendType({
         subCategoryId: nonNull(stringArg()),
         price: nonNull(intArg()),
         ownerId: nonNull(stringArg()),
-        color: nonNull(stringArg())
+        color: nonNull('Color')
       },
       resolve: (_parent, _args, context) => {
         return context.prisma.item.create({
