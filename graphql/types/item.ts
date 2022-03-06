@@ -124,7 +124,20 @@ export const ItemMutations = extendType({
           data: _args
         })
       },
-      description: "Add new itemq"
+      description: "Add new item."
+    }),
+    t.field('addItemContentLinks', {
+      type: 'ItemContentLink',
+      args: {
+        itemId: nonNull(stringArg()),
+        contentLink: nonNull(stringArg()),
+      },
+      resolve: (_parent, _args, context) => {
+        return context.prisma.itemContentLink.create({
+          data: _args
+        })
+      },
+      description: "Add new item content link."
     })
   }
 });

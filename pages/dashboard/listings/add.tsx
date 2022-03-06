@@ -6,6 +6,7 @@ import { gql, useMutation, useQuery } from '@apollo/client';
 import { Color } from '@prisma/client';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useS3Upload } from 'next-s3-upload';
 
 
 const AllCategoriesQuery = gql`
@@ -39,6 +40,14 @@ const AddNewItem = gql`
     }
 `
 
+const AddItemContentLink = gql`
+    mutation addItemContentLinks($itemId: String!, $contentLink: String!) {
+      addItemContentLinks(itemId: $itemId, contentLink: $contentLink) {
+            itemId
+        }
+    }
+`
+
 export default function AddListing() {
     const router = useRouter();
     const user = useUser();
@@ -48,6 +57,12 @@ export default function AddListing() {
     }});
     const [subcategoriesList, setsubcategoriesList] = useState({subcategoriesList: []});
     const [addItem] = useMutation(AddNewItem);
+    const [addItemContentLinks] = useMutation(AddItemContentLink);
+
+    
+    let [imageUrl, setImageUrl] = useState({list: []});
+    let { uploadToS3 } = useS3Upload();
+    let contentLinks: string[] = [];
 
     const colorsList = Object.values(Color);
     let mainCatIndex = 0;
@@ -59,12 +74,23 @@ export default function AddListing() {
         })
     }
 
-    const addListing = event => {
+    
+    const handleFileChange = async (event) => {
+      let file = event.target.files[0];
+      let { url } = await uploadToS3(file);
+      setImageUrl({
+        list: [...imageUrl.list, url]
+      })
+    }
+
+    const addListing = async (event) => {
       event.preventDefault();
       const userId = userQuery.data?.user?.id;
-      console.log(userId);
+      let newItemId: string;
       
-      const newItem = addItem({
+      console.log(imageUrl.list);
+      
+      const newItem = await addItem({
         variables: {
           name: event.target.name.value,
           description: event.target.price.value,
@@ -73,15 +99,16 @@ export default function AddListing() {
           ownerId: userId,
           color: event.target.color.value
         }
-      }).catch((e) => console.log(e)).then(res => {
-        router.push('/listing/' + res?.data?.addItem.id)
-        
-      })
-      
-      if (newItem) {
-        console.log(newItem);
-        
-      }
+      }); 
+
+      imageUrl.list.forEach(cl => {
+          addItemContentLinks({variables: {
+            itemId: newItem?.data?.addItem.id,
+            contentLink: cl
+          }}).then((res) => {
+            router.push('/listing/' + res?.data?.addItemContentLinks.itemId)
+          })
+        });
     }
 
     return (
@@ -201,8 +228,8 @@ export default function AddListing() {
                     </p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Cover photo</label>
+                  <div className="col-span-3">
+                    <label className="block text-sm font-medium text-gray-700">Images</label>
                     <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                       <div className="space-y-1 text-center">
                         <svg
@@ -219,13 +246,13 @@ export default function AddListing() {
                             strokeLinejoin="round"
                           />
                         </svg>
-                        <div className="flex text-sm text-gray-600">
+                        <div className="text-sm text-gray-600">
                           <label
-                            htmlFor="file-upload"
+                            htmlFor="files"
                             className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
                           >
                             <span>Upload a file</span>
-                            <input id="file-upload" name="file-upload" type="file" className="sr-only" />
+                            <input id="files" name="files" type="file" className="sr-only" onChange={handleFileChange}  />
                           </label>
                           <p className="pl-1">or drag and drop</p>
                         </div>
@@ -233,6 +260,11 @@ export default function AddListing() {
                       </div>
                     </div>
                   </div>
+                  <div className="col-span-3">
+                    <div className="grid gap-2 grid-flow-col-dense">
+                    {imageUrl && imageUrl.list.map((cl => (<img key={cl} src={cl} />))) }
+                    </div>
+                    </div>
                 </div>
                 <div className="px-4 py-3 text-right sm:px-6">
                   <button
