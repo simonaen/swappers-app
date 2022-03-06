@@ -16,7 +16,17 @@ export default function ListingCard(props) {
                     {props.listing.name}
                 </a>
                 </h3>
+                { props.listing?.sold ? (
+                    <span className="px-3 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                        Sold
+                    </span> 
+                    ) : (
+                    <span className="px-3 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Available
+                    </span> 
+                )}
                 <p className="mt-1 text-sm text-gray-500 h-4 overflow-y-hidden">{props.listing.description}</p>
+                
             </div>
             <p className="text-sm font-medium text-gray-900">${props.listing.price}</p>
             </div>
