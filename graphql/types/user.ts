@@ -39,6 +39,7 @@ export const UsersQuery = extendType({
             resolve: (_parent, _args, context) => {
               return context.prisma.user.findMany()
             },
+            description: "Get all users."
         }),
         t.nonNull.field('user', {
           type: 'User',
@@ -50,6 +51,7 @@ export const UsersQuery = extendType({
               where: {email: _args.userEmail}
             })
           },
+          description: "Get user by user email."
       })
     }
 })
@@ -72,6 +74,7 @@ export const UserMutations = extendType({
                 }
               })
             },
+            description: "Set user blocked field to true."
           })
 
           t.field('unblockUser', {
@@ -89,6 +92,7 @@ export const UserMutations = extendType({
                 }
               })
             },
+            description: "Set user blocked field to false."
           })
 
           t.field('changeUserRole', {
@@ -107,6 +111,7 @@ export const UserMutations = extendType({
                 }
               })
             },
+            description: "Set user role by passing userId and role."
           })
     }
 })

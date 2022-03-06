@@ -1,4 +1,4 @@
-import { extendType, nonNull, objectType, stringArg } from "nexus"
+import { enumType, extendType, nonNull, objectType, stringArg } from "nexus"
 
 export const MainCategory = objectType({
     name: 'MainCategory',
@@ -15,14 +15,23 @@ export const MainCategory = objectType({
         },
       })
     },
+    description: "Maincategory object type. Contains: id, name, subcategories list."
+
 });
 
 export const SubCategory = objectType({
-name: 'SubCategory',
-definition(t) {
-    t.nonNull.string('id')
-    t.nonNull.string('name')
-},
+  name: 'SubCategory',
+  definition(t) {
+      t.nonNull.string('id')
+      t.nonNull.string('name')
+  },
+  description: "Subcategory object type. Contains: id, name."
+});
+
+export const Color = enumType({
+  name: "Color",
+  members: ["RED", "ORANGE", "YELLOW", "GREEN", "BLUE", "PURPLE", "PINK", "BROWN", "BEIGE", "WHITE", "BLACK", "GRAY", "MULTICOLOR", "GOLD", "SILVER"],
+  description: "Color enumurator."
 });
 
 
@@ -34,6 +43,8 @@ export const CategoriesQuery = extendType({
             resolve: (_parent, _args, context) => {
               return context.prisma.mainCategory.findMany()
             },
+            description: "Get all categories in MainCategory table."
+
         })
     }
 })
@@ -54,6 +65,7 @@ export const CategoriesMutation = extendType({
             }
             )
           },
+          description: "Add new category to main categories."
       }),
 
       t.field('addSubCategory', {
@@ -71,6 +83,7 @@ export const CategoriesMutation = extendType({
           }
           )
         },
+        description: "Add new category to sub categories."
     })
   }
 })

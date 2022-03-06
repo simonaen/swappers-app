@@ -1,4 +1,4 @@
-import { extendType, mutationType, nonNull, objectType, stringArg } from "nexus";
+import { extendType, intArg, mutationType, nonNull, objectType, stringArg } from "nexus";
 import { SubCategory } from "./categories";
 import { DateScalar } from "./shared";
 import { User } from "./user";
@@ -41,6 +41,7 @@ export const Item = objectType({
         },
       })
     },
+    description: "Item object type. Corresponds to listing in UI context. Conatins: id, name, descripition, dateAdded, dateModified, price, availability status (sold), owner, conentLinks, subcategory"
 });
 
 export const ItemContentLink = objectType({
@@ -48,7 +49,8 @@ export const ItemContentLink = objectType({
   definition(t) {
     t.string('contentLink')
     t.string('itemId')
-  }
+  },
+  description: "ItemContentLInk object type. Conatins: contentlink and itemId. Conentlinks cannot be duplicate."
 })
 
 export const ItemQuery = extendType({
@@ -59,6 +61,7 @@ export const ItemQuery = extendType({
           resolve: (_parent, _args, context) => {
             return context.prisma.item.findMany()
           },
+          description: "Get all rows in items table."
       }),
       t.list.nonNull.field('allItemsByUser', {
         type: 'Item',
@@ -70,6 +73,7 @@ export const ItemQuery = extendType({
             ownerId: _args.userId
           }})
         },
+        description: "Get all items by user. Passed arg userId."
     }),
       t.nonNull.field('itemById', {
         type: 'Item',
@@ -83,6 +87,7 @@ export const ItemQuery = extendType({
             }
           })
         },
+        description: "Get single item by it's id."
     })
   }
 });
@@ -102,6 +107,24 @@ export const ItemMutations = extendType({
           }
         })
       },
+      description: "Remove item from table."
+    })
+    t.field('addItem', {
+      type: 'Item',
+      args: {
+        name: nonNull(stringArg()),
+        description: stringArg(),
+        subCategoryId: nonNull(stringArg()),
+        price: nonNull(intArg()),
+        ownerId: nonNull(stringArg()),
+        color: nonNull(stringArg())
+      },
+      resolve: (_parent, _args, context) => {
+        return context.prisma.item.create({
+          data: _args
+        })
+      },
+      description: "Add new itemq"
     })
   }
 });
