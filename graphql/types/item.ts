@@ -1,4 +1,5 @@
 import { extendType, mutationType, nonNull, objectType, stringArg } from "nexus";
+import { SubCategory } from "./categories";
 import { DateScalar } from "./shared";
 import { User } from "./user";
 
@@ -10,6 +11,17 @@ export const Item = objectType({
       t.nonNull.field('dateLastModified', { type: DateScalar })
       t.nonNull.string('name')
       t.string('description')
+      t.nonNull.int('price')
+      t.nonNull.boolean('sold')
+      t.field('owner', {
+        type: User,
+        async resolve(_parent, _args, context) {
+          return await context.prisma.item
+            .findUnique({
+              where: { id: _parent.id || undefined },
+            }).owner()
+        },
+      })
       t.list.field('contentLinks', {
         type: ItemContentLink,
         async resolve(_parent, _args, context) {
@@ -19,16 +31,13 @@ export const Item = objectType({
             }).contentLinks()
         },
       })
-      t.nonNull.int('price')
-      t.nonNull.boolean('sold')
-      t.nonNull.int('viewCount')
-      t.field('owner', {
-        type: User,
+      t.nonNull.field('subCategory', {
+        type: SubCategory,
         async resolve(_parent, _args, context) {
           return await context.prisma.item
             .findUnique({
               where: { id: _parent.id || undefined },
-            }).owner()
+            }).subCategory()
         },
       })
     },
@@ -60,6 +69,19 @@ export const ItemQuery = extendType({
           return context.prisma.item.findMany({where: {
             ownerId: _args.userId
           }})
+        },
+    }),
+      t.nonNull.field('itemById', {
+        type: 'Item',
+        args: {
+          itemId: nonNull(stringArg())
+        },
+        resolve: (_parent, _args, context) => {
+          return context.prisma.item.findFirst({
+            where: {
+              id: _args.itemId
+            }
+          })
         },
     })
   }
