@@ -2,6 +2,8 @@ import Head from 'next/head'
 import { gql, useQuery } from '@apollo/client'
 import Navbar from '../components/navbar/nabvar.component'
 import Landing from '../components/landing/landing.component'
+import RecentListings from '../components/landing/recent-listings.component'
+import Footer from '../components/footer/footer.component'
 
 
 export default function Home() {
@@ -17,7 +19,8 @@ export default function Home() {
 
       <Navbar />
       <Landing/>
-      
+      <RecentListings/>
+      <Footer/>
     </div>
   )
 }
