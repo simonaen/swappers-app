@@ -327,6 +327,96 @@ export const ItemQuery = extendType({
       }
     },
     description: "Filter items and return paginated."
+  }),
+  t.field('filterItemsBycategoryPaginated', {
+    type: 'ItemPagedResponse',
+    args: {
+      first: intArg(),
+      after: stringArg(),
+      categoryName: nonNull(stringArg())
+    },
+    resolve: async (_parent, _args, context) => {
+      let queryResults = null;
+
+      if (_args.after) {
+        queryResults = await context.prisma.item.findMany({
+          take: _args.first,
+          skip: 1,
+          cursor: {
+            id: _args.after,
+          },
+          orderBy: {
+            dateAdded: 'desc',
+          },
+          where: _args.categoryName
+          ? {
+              OR: [
+                { subCategory: { name: { contains: _args.categoryName, mode: 'insensitive'}}},
+                { subCategory: { mainCategory: { name: { contains: _args.categoryName, mode: 'insensitive'}}}},
+              ]
+            }
+          : {}
+        })
+      } else {
+        queryResults = await context.prisma.item.findMany({
+          take: _args.first,
+          orderBy: {
+            dateAdded: 'desc',
+          },
+          where: _args.categoryName
+          ? {
+              OR: [
+                { subCategory: { name: { contains: _args.categoryName, mode: 'insensitive'}}},
+                { subCategory: { mainCategory: { name: { contains: _args.categoryName, mode: 'insensitive'}}}},
+              ]
+            }
+          : {}
+        })
+      }
+      if (queryResults.length > 0) {
+        const lastItemInResults = queryResults[queryResults.length - 1]
+        const myCursor = lastItemInResults.id
+
+        const secondQueryResults = await context.prisma.item.findMany({
+          take: _args.first,
+          cursor: {
+            id: myCursor,
+          },
+          where: _args.categoryName
+          ? {
+              OR: [
+                { subCategory: { name: { contains: _args.categoryName, mode: 'insensitive'}}},
+                { subCategory: { mainCategory: { name: { contains: _args.categoryName, mode: 'insensitive'}}}},
+              ]
+            }
+          : {},
+          orderBy: {
+            dateAdded: 'desc',
+          },
+        })
+        const result = {
+          pageInfo: {
+            endCursor: myCursor,
+            hasNextPage: secondQueryResults.length >= _args.first,
+          },
+          edges: queryResults.map(item => ({
+            cursor: item.id,
+            node: item,
+          })),
+        }
+
+        return result
+      }
+      
+      return {
+        pageInfo: {
+          endCursor: null,
+          hasNextPage: false,
+        },
+        edges: [],
+      }
+    },
+    description: "Filter items and return paginated."
   })
   }
 });
