@@ -1,5 +1,7 @@
 import { Kind } from "graphql"
-import { scalarType } from "nexus"
+import { objectType, scalarType } from "nexus"
+import { Item } from "./item"
+import { User } from "./user"
 
 export const DateScalar = scalarType({
     name: 'Date',
@@ -18,3 +20,51 @@ export const DateScalar = scalarType({
       return null
     },
   })
+
+export const ItemEdge = objectType({
+  name: 'ItemEdge',
+  definition(t) {
+    t.string('cursor')
+    t.field('node', {
+      type: Item,
+    })
+  },
+})
+
+export const PageInfo = objectType({
+  name: 'PageInfo',
+  definition(t) {
+    t.string('endCursor')
+    t.boolean('hasNextPage')
+  },
+})
+
+export const ItemPagedResponse = objectType({
+  name: 'ItemPagedResponse',
+  definition(t) {
+    t.field('pageInfo', { type: PageInfo })
+    t.list.field('edges', {
+      type: ItemEdge,
+    })
+  },
+})
+
+export const UserEdge = objectType({
+  name: 'UserEdge',
+  definition(t) {
+    t.string('cursor')
+    t.field('node', {
+      type: User,
+    })
+  },
+})
+
+export const UserPagedResponse = objectType({
+  name: 'UserPagedResponse',
+  definition(t) {
+    t.field('pageInfo', { type: PageInfo })
+    t.list.field('edges', {
+      type: UserEdge,
+    })
+  },
+})
