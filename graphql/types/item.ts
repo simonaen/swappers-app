@@ -67,7 +67,7 @@ export const ItemQuery = extendType({
         type: 'ItemPagedResponse',
         args: {
           first: intArg(),
-          after: stringArg()
+          after: stringArg(),
         },
         resolve: async (_parent, _args, context) => {
           let queryResults = null
@@ -79,10 +79,16 @@ export const ItemQuery = extendType({
               cursor: {
                 id: _args.after,
               },
+              orderBy: {
+                dateAdded: 'desc',
+              },
             })
           } else {
             queryResults = await context.prisma.item.findMany({
               take: _args.first,
+              orderBy: {
+                dateAdded: 'desc',
+              },
             })
           }
           if (queryResults.length > 0) {
@@ -166,6 +172,96 @@ export const ItemQuery = extendType({
         })
       },
       description: "Get all items containing filter in name or description."
+  }),
+  t.field('filterItemsPaginated', {
+    type: 'ItemPagedResponse',
+    args: {
+      first: intArg(),
+      after: stringArg(),
+      filter: nonNull(stringArg())
+    },
+    resolve: async (_parent, _args, context) => {
+      let queryResults = null
+
+      if (_args.after) {
+        queryResults = await context.prisma.item.findMany({
+          take: _args.first,
+          skip: 1,
+          cursor: {
+            id: _args.after,
+          },
+          orderBy: {
+            dateAdded: 'desc',
+          },
+          where: _args.filter
+          ? {
+              OR: [
+                { description: { contains: _args.filter, mode: 'insensitive', } },
+                { name: { contains: _args.filter, mode: 'insensitive', } }
+              ]
+            }
+          : {}
+        })
+      } else {
+        queryResults = await context.prisma.item.findMany({
+          take: _args.first,
+          orderBy: {
+            dateAdded: 'desc',
+          },
+          where: _args.filter
+          ? {
+              OR: [
+                { description: { contains: _args.filter, mode: 'insensitive', } },
+                { name: { contains: _args.filter, mode: 'insensitive', } }
+              ]
+            }
+          : {},
+        })
+      }
+      if (queryResults.length > 0) {
+        const lastItemInResults = queryResults[queryResults.length - 1]
+        const myCursor = lastItemInResults.id
+
+        const secondQueryResults = await context.prisma.item.findMany({
+          take: _args.first,
+          cursor: {
+            id: myCursor,
+          },
+          where: _args.filter
+          ? {
+              OR: [
+                { description: { contains: _args.filter, mode: 'insensitive', } },
+                { name: { contains: _args.filter, mode: 'insensitive', } }
+              ]
+            }
+          : {},
+          orderBy: {
+            dateAdded: 'desc',
+          },
+        })
+        const result = {
+          pageInfo: {
+            endCursor: myCursor,
+            hasNextPage: secondQueryResults.length >= _args.first,
+          },
+          edges: queryResults.map(item => ({
+            cursor: item.id,
+            node: item,
+          })),
+        }
+
+        return result
+      }
+      
+      return {
+        pageInfo: {
+          endCursor: null,
+          hasNextPage: false,
+        },
+        edges: [],
+      }
+    },
+    description: "Filter items and return paginated."
   })
   }
 });
