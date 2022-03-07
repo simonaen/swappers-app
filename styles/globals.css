@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 html,
 body {
   padding: 0;
@@ -26,4 +27,33 @@ a {
   background: -webkit-linear-gradient(45deg, #439cfb, #f187fb);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Adds Quicksand font-family */
+.quicksand-ff {
+  font-family: Quicksand;
+  font-weight: bolder;
+}
+
+/* Styles for logo */
+.landing-logo {
+  font-size: 12rem;
+  font-weight: bolder;
+  font-family: Quicksand;
+  word-wrap: break-word;
+  line-height: 10rem;
+}
+
+/* Dot background */
+.dot-bg {
+  background-image: radial-gradient(#FBAB7E 20%, transparent 20%),
+      radial-gradient(#E0C3FC 20%, transparent 20%);
+  background-color: #fff;
+  background-position: 0 0, 50px 50px;
+  background-size: 100px 100px;
+}
+
+/* Removes icon inside inpute field of type search */
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
 }
