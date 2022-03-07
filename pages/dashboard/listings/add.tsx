@@ -121,7 +121,7 @@ export default function AddListing() {
 
         <Navbar />
         <Sidebar>
-        <div className="bg-white">
+        <div className="bg-white max-h-full overflow-scroll">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8">
             <h2 className="text-2xl font-extrabold tracking-tight text-gray-900">Add new listing</h2>
 
@@ -262,7 +262,7 @@ export default function AddListing() {
                   </div>
                   <div className="col-span-3">
                     <div className="grid gap-2 grid-flow-col-dense">
-                    {imageUrl && imageUrl.list.map((cl => (<img key={cl} src={cl} />))) }
+                    {imageUrl && imageUrl.list.map((cl => (<img className="max-h-32 w-auto" key={cl} src={cl} />))) }
                     </div>
                     </div>
                 </div>
