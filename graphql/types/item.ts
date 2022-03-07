@@ -88,7 +88,26 @@ export const ItemQuery = extendType({
           })
         },
         description: "Get single item by it's id."
-    })
+    }),
+    t.list.nonNull.field('filterItems', {
+      type: 'Item',
+      args: {
+        filter: stringArg()
+      },
+      resolve: (_parent, _args, context) => {
+        return context.prisma.item.findMany({
+          where: _args.filter
+          ? {
+              OR: [
+                { description: { contains: _args.filter, mode: 'insensitive', } },
+                { name: { contains: _args.filter, mode: 'insensitive', } }
+              ]
+            }
+          : {}
+        })
+      },
+      description: "Get all items containing filter in name or description."
+  })
   }
 });
 

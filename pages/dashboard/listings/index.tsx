@@ -29,8 +29,7 @@ const AllUserListings = gql`
 
 export default function Listings() {
     const { data, loading, error } = useQuery(AllUserListings, {variables: {userId: "262be627-9a66-4c3f-a901-b9814cfa5eb7"}});
-        
-    const { user } = useUser();
+
     return (
         <div>
         <Head>
