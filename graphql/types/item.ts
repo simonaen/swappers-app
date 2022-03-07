@@ -128,15 +128,80 @@ export const ItemQuery = extendType({
         },
         description: "Get all rows in items table paginated."
     }),
-      t.list.nonNull.field('allItemsByUser', {
-        type: 'Item',
+      t.field('allItemsByUser', {
+        type: 'ItemPagedResponse',
         args: {
-          userId: nonNull(stringArg())
+          userEmail: nonNull(stringArg()),
+          first: intArg(),
+          after: stringArg()
         },
-        resolve: (_parent, _args, context) => {
-          return context.prisma.item.findMany({where: {
-            ownerId: _args.userId
-          }})
+        resolve: async (_parent, _args, context) => {
+          let queryResults = null
+          const user = await context.prisma.user.findFirst({where: {
+            email: _args.userEmail
+          }});
+          if (_args.after) {
+            queryResults = await context.prisma.item.findMany({
+              take: _args.first,
+              skip: 1,
+              cursor: {
+                id: _args.after,
+              },
+              where: {
+                ownerId: user.id
+              },
+              orderBy: {
+                dateAdded: 'desc',
+              },
+            })
+          } else {
+            queryResults = await context.prisma.item.findMany({
+              take: _args.first,
+              where: {
+                ownerId: user.id
+              },
+              orderBy: {
+                dateAdded: 'desc',
+              },
+            })
+          }
+          if (queryResults.length > 0) {
+            const lastItemInResults = queryResults[queryResults.length - 1]
+            const myCursor = lastItemInResults.id
+  
+            const secondQueryResults = await context.prisma.item.findMany({
+              take: _args.first,
+              cursor: {
+                id: myCursor,
+              },
+              where: {
+                ownerId: user.id
+              },
+              orderBy: {
+                dateAdded: 'desc',
+              },
+            })
+            const result = {
+              pageInfo: {
+                endCursor: myCursor,
+                hasNextPage: secondQueryResults.length >= _args.first,
+              },
+              edges: queryResults.map(item => ({
+                cursor: item.id,
+                node: item,
+              })),
+            }
+  
+            return result
+          }
+          
+          return {
+            pageInfo: {
+              endCursor: null,
+              hasNextPage: false,
+            },
+            edges: [],
+          }
         },
         description: "Get all items by user. Passed arg userId."
     }),
