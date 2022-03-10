@@ -2,7 +2,6 @@ import { useQuery } from "@apollo/client"
 import { gql } from "apollo-server-micro"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import Navbar from "../../components/navbar/nabvar.component"
 
 const Listing = gql`
   query itemById($itemId: String!) {
@@ -44,7 +43,6 @@ export default function ListingOverview() {
         <meta name="description" content="Swap, sell, and buy collecyable items" />
         <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Navbar/>
         {data?.itemById ? (
             <div className="pt-6">
                 <nav aria-label="Breadcrumb">
@@ -113,7 +111,8 @@ export default function ListingOverview() {
                     <a className="cursor-pointer hover:text-blue-400"> {data?.itemById.owner.firstName} {data?.itemById.owner.lastName}</a></p> 
                     <p className="text-sm text-gray-700">On {data?.itemById.dateAdded}</p>
                     { data?.itemById.sold ? (null) :(
-                    <div className="mt-4 w-fit items-center justify-center px-4 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-white bg-blue-200 hover:bg-indigo-200">
+                    <div className="mt-4 w-fit items-center justify-center px-4 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-white bg-blue-200 hover:bg-indigo-200"
+                            onClick={()=> {router.push('/listing/message/' + listingid)}}>
                     Message owner
                     </div>
                     )}

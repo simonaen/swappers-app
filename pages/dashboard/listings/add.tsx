@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import { useUser } from '@auth0/nextjs-auth0'
-import Navbar from '../../../components/navbar/nabvar.component';
 import Sidebar from '../../../components/sidebar/sidebar.component';
 import { gql, useMutation, useQuery } from '@apollo/client';
 import { Color } from '@prisma/client';
@@ -119,7 +118,6 @@ export default function AddListing() {
             <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        <Navbar />
         <Sidebar>
         <div className="bg-white max-h-full overflow-scroll">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8">

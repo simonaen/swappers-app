@@ -1,9 +1,7 @@
 import { gql, useQuery } from "@apollo/client";
 import Head from "next/head";
-import router, { useRouter } from "next/router";
-import { useMediaQuery } from "react-responsive";
+import { useRouter } from "next/router";
 import ListingCard from "../../components/listing/listing-card.component";
-import Navbar from "../../components/navbar/nabvar.component";
 import Searchbar from "../../components/searchbar/searchbar.component";
 
 const FilterItems = gql`
@@ -44,7 +42,6 @@ export default function FilterResults () {
             <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        <Navbar />
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8 py-8">
             <h2 className="text-2xl mb-4 font-extrabold tracking-tight text-gray-900">Search results for: {filter}</h2>
             <Searchbar/>

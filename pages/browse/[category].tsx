@@ -1,10 +1,7 @@
 import { gql, useQuery } from "@apollo/client";
 import Head from "next/head";
-import router, { useRouter } from "next/router";
-import { useMediaQuery } from "react-responsive";
+import { useRouter } from "next/router";
 import ListingCard from "../../components/listing/listing-card.component";
-import Navbar from "../../components/navbar/nabvar.component";
-import Searchbar from "../../components/searchbar/searchbar.component";
 
 const FilterItemsByCategory = gql`
   query filterItemsBycategoryPaginated($categoryName: String!, $first: Int, $after: String) {
@@ -33,7 +30,6 @@ const FilterItemsByCategory = gql`
 export default function FilterResults () {
     const router = useRouter();
     const { category } = router.query;
-    console.log(router.query);
     
     const { data, loading, error, fetchMore } = useQuery(FilterItemsByCategory, {variables: {categoryName: category, first: 7}});
 
@@ -46,7 +42,6 @@ export default function FilterResults () {
             <link rel="icon" href="/favicon.ico" />
         </Head>
 
-        <Navbar />
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8 py-8">
             <h2 className="text-2xl mb-4 font-extrabold tracking-tight text-gray-900">Browsing {category} category</h2>
             <div className="max-h-screen overflow-scroll">
