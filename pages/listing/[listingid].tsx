@@ -32,10 +32,7 @@ export default function ListingOverview() {
     const { listingid } = router.query
     const {data, loading, error} = useQuery(Listing, {variables: {itemId: listingid}});
     let key = 1;
-
-    console.log(data);
     
-
     return (
         <div>
         <Head>
@@ -110,7 +107,7 @@ export default function ListingOverview() {
                     <p className="text-sm text-gray-700">Posted by 
                     <a className="cursor-pointer hover:text-blue-400"> {data?.itemById.owner.firstName} {data?.itemById.owner.lastName}</a></p> 
                     <p className="text-sm text-gray-700">On {data?.itemById.dateAdded}</p>
-                    { data?.itemById.sold ? (null) :(
+                    { (data?.itemById.sold || router.pathname.includes('message')) ? (null) :(
                     <div className="mt-4 w-fit items-center justify-center px-4 py-2 cursor-pointer border border-transparent rounded-md shadow-sm text-white bg-blue-200 hover:bg-indigo-200"
                             onClick={()=> {router.push('/listing/message/' + listingid)}}>
                     Message owner
