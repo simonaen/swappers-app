@@ -104,7 +104,7 @@ type Query {
   allItems: [Item!]!
 
   """Get all items by user. Passed arg userId."""
-  allItemsByUser(userId: String!): [Item!]
+  allItemsByUser(after: String, first: Int, userEmail: String!): ItemPagedResponse
 
   """Get all rows in items table paginated."""
   allItemsPaginated(after: String, first: Int): ItemPagedResponse
@@ -112,8 +112,17 @@ type Query {
   """Get all users."""
   allUsers: [User!]!
 
+  """Get all rows in users table paginated."""
+  allusersPaginated(after: String, first: Int): UserPagedResponse
+
   """Get all items containing filter in name or description."""
   filterItems(filter: String): [Item!]
+
+  """Filter items and return paginated."""
+  filterItemsBycategoryPaginated(after: String, categoryName: String!, first: Int): ItemPagedResponse
+
+  """Filter items and return paginated."""
+  filterItemsPaginated(after: String, filter: String!, first: Int): ItemPagedResponse
 
   """Get single item by it's id."""
   itemById(itemId: String!): Item!
