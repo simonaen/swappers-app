@@ -92,7 +92,7 @@ export default function AddListing() {
       const newItem = await addItem({
         variables: {
           name: event.target.name.value,
-          description: event.target.price.value,
+          description: event.target.description.value,
           subCategoryId: event.target.subcategory.value,
           price: parseInt(event.target.price.value),
           ownerId: userId,
